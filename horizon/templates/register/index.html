@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block body_id %}splash{% endblock %}
+
+{% block content %}
+    {% if username %}
+    {% include 'horizon/register/register_do.html' %}
+   
+    {% else %}
+    {% include 'horizon/register/_regform.html' %}
+    {% endif%}
+{% endblock %}
