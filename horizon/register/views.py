@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from horizon.register.forms import RegForm
-from openstack_dashboard.views import user_home
+from openstack_dashboard.views import get_user_home
 import ConfigParser
 import commands
 

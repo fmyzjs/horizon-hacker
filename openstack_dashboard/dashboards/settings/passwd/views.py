@@ -19,7 +19,7 @@
 from django import shortcuts
 from django.template import response
 from django.conf import settings
-from horizon.api import keystone
+from openstack_dashboard.api import keystone
 import ConfigParser
 import os
 

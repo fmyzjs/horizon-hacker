@@ -17,8 +17,8 @@
 from django.utils.translation import ugettext_lazy as _
 
 import horizon
-from horizon.dashboards.settings import dashboard
-
+#from horizon.dashboards.settings import dashboard
+from openstack_dashboard.dashboards.settings import dashboard
 
 class PasswdPanel(horizon.Panel):
     name=_("Change Password")
