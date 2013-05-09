@@ -4,16 +4,48 @@ Created on 2012-9-17
 @author: Lion
 '''
 
-from django import shortcuts
-from django.conf import settings
-from django.core.exceptions import ValidationError
+import operator
+
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.debug import sensitive_post_parameters
+
+from horizon import exceptions
+from horizon import forms
+from horizon import tables
+
+from openstack_dashboard import api
 from horizon.register.forms import RegForm
 from openstack_dashboard.views import get_user_home
+
+from .forms import RegUserForm
 import ConfigParser
 import commands
 
-def register(request):
+
+
+class IndexView(forms.ModalFormView):
+    form_class = RegUserForm
+    template_name = 'register/index.html'
+    
+    def get_data(self):
+    if request.user.is_authenticated():
+        return shortcuts.redirect(user_home(request.user))
+    request.session.clear()
+    try:
+        re=settings.REGISTER_ENABLED
+        re_declare=settings.REGISTER_DISABLE_DECLARE
+    except:
+        re=True
+        re_declare=""
+        
+    if(re):
+        return shortcuts.render(request, 'horizon/register/index.html', {'form': regform})
+    else:
+        return shortcuts.render(request, 'horizon/register/register_disable.html', {'declare': re_declare})
+
+'''def register(request):
     if request.user.is_authenticated():
         return shortcuts.redirect(user_home(request.user))
     regform = RegForm()
@@ -28,10 +60,35 @@ def register(request):
     if(re):
         return shortcuts.render(request, 'horizon/register/index.html', {'form': regform})
     else:
-        return shortcuts.render(request, 'horizon/register/register_disable.html', {'declare': re_declare})
+        return shortcuts.render(request, 'horizon/register/register_disable.html', {'declare': re_declare})'''
 
+class RegView(forms.ModalFormView):
+    form_class = RegUserForm
+    template_name = 'register/register_do.html'
+    success_url = reverse_lazy('horizon:register:index')
 
-def register_do(request):
+    @method_decorator(sensitive_post_parameters('password',
+                                                'confirm_password'))
+    def dispatch(self, *args, **kwargs):
+        return super(RegView, self).dispatch(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super(RegView, self).get_form_kwargs()
+        try:
+            roles = api.keystone.role_list(self.request)
+        except:
+            redirect = reverse("horizon:register:index")
+            exceptions.handle(self.request,
+                              _("Unable to retrieve user roles."),
+                              redirect=redirect)
+        roles.sort(key=operator.attrgetter("id"))
+        kwargs['roles'] = roles
+        return kwargs
+
+    def get_initial(self):
+        default_role = api.keystone.get_default_role(self.request)
+        return {'role_id': getattr(default_role, "id", None)}
+'''def register_do(request):
     rf=RegForm(request.POST)
     er=""
     if rf.is_valid():
@@ -58,6 +115,6 @@ def register_do(request):
         else:
             er=_('Create Tenant fail, Tenant name perhaps exist.')
         
-    return shortcuts.render(request, 'horizon/register/index.html', {'form': rf,'error':er})
+    return shortcuts.render(request, 'horizon/register/index.html', {'form': rf,'error':er})'''
     
 
