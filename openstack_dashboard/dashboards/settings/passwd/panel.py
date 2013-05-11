@@ -1,5 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
+'''
+Created on 2013-5-5
 
+@author: fmy
+'''
 # Copyright 2012 Openstack, LLC
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,8 +21,8 @@
 from django.utils.translation import ugettext_lazy as _
 
 import horizon
-#from horizon.dashboards.settings import dashboard
 from openstack_dashboard.dashboards.settings import dashboard
+
 
 class PasswdPanel(horizon.Panel):
     name=_("Change Password")

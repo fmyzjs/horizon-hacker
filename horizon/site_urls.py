@@ -26,7 +26,10 @@ from django.conf import settings
 urlpatterns = patterns('horizon.views',
     url(r'home/$', 'user_home', name='user_home')
 )
-
+#register
+urlpatterns += patterns('horizon.register.views',
+    url(r'^register/$', 'register', name='register'),
+    url(r'register/do/$','register_do', name='register_do'))
 # Client-side i18n URLconf.
 urlpatterns += patterns('',
     url(r'^i18n/js/(?P<packages>\S+?)/$',
@@ -37,10 +40,6 @@ urlpatterns += patterns('',
         name="set_language"),
     url(r'^i18n/', include('django.conf.urls.i18n'))
 )
-#register
-urlpatterns += patterns('horizon.register.views',
-    url(r'^register$', 'register', name='register'),
-    url(r'register/do/$','register_do', name='register_do'))
 if settings.DEBUG:
     urlpatterns += patterns('',
         url(r'^qunit/$',

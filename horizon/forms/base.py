@@ -46,7 +46,6 @@ class SelfHandlingForm(SelfHandlingMixin, forms.Form):
         """
         self._errors[NON_FIELD_ERRORS] = self.error_class([message])
 
-
 class DateForm(forms.Form):
     """ A simple form for selecting a start date. """
     month = forms.ChoiceField(choices=dates.MONTHS.items())

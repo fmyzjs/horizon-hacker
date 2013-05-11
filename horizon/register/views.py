@@ -5,7 +5,8 @@ Created on 2012-9-17
 '''
 
 import operator
-
+from django import shortcuts
+from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
@@ -13,83 +14,40 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from horizon import exceptions
 from horizon import forms
-from horizon import tables
+
 
 from openstack_dashboard import api
-from horizon.register.forms import RegForm
+from horizon.register.forms import RegUserForm
 from openstack_dashboard.views import get_user_home
 
-from .forms import RegUserForm
 import ConfigParser
 import commands
 
 
+def register(request):
+    if request.user.is_authenticated():
+        return shortcuts.redirect(user_home(request.user))
+    regform = RegUserForm(request)
+    request.session.clear()
+    try:
+        re=settings.REGISTER_ENABLED
+        re_declare=settings.REGISTER_DISABLE_DECLARE
+    except:
+        re=True
+        re_declare=""
+        
+    if(re):
+        return shortcuts.render(request, 'register/index.html', {'form': regform})
+    else:
+        return shortcuts.render(request, 'register/register_disable.html', {'declare': re_declare})
 
-class IndexView(forms.ModalFormView):
-    form_class = RegUserForm
-    template_name = 'register/index.html'
+
     
-    def get_data(self):
-    if request.user.is_authenticated():
-        return shortcuts.redirect(user_home(request.user))
-    request.session.clear()
-    try:
-        re=settings.REGISTER_ENABLED
-        re_declare=settings.REGISTER_DISABLE_DECLARE
-    except:
-        re=True
-        re_declare=""
-        
-    if(re):
-        return shortcuts.render(request, 'horizon/register/index.html', {'form': regform})
-    else:
-        return shortcuts.render(request, 'horizon/register/register_disable.html', {'declare': re_declare})
 
-'''def register(request):
-    if request.user.is_authenticated():
-        return shortcuts.redirect(user_home(request.user))
-    regform = RegForm()
-    request.session.clear()
-    try:
-        re=settings.REGISTER_ENABLED
-        re_declare=settings.REGISTER_DISABLE_DECLARE
-    except:
-        re=True
-        re_declare=""
-        
-    if(re):
-        return shortcuts.render(request, 'horizon/register/index.html', {'form': regform})
-    else:
-        return shortcuts.render(request, 'horizon/register/register_disable.html', {'declare': re_declare})'''
+    
 
-class RegView(forms.ModalFormView):
-    form_class = RegUserForm
-    template_name = 'register/register_do.html'
-    success_url = reverse_lazy('horizon:register:index')
-
-    @method_decorator(sensitive_post_parameters('password',
-                                                'confirm_password'))
-    def dispatch(self, *args, **kwargs):
-        return super(RegView, self).dispatch(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        kwargs = super(RegView, self).get_form_kwargs()
-        try:
-            roles = api.keystone.role_list(self.request)
-        except:
-            redirect = reverse("horizon:register:index")
-            exceptions.handle(self.request,
-                              _("Unable to retrieve user roles."),
-                              redirect=redirect)
-        roles.sort(key=operator.attrgetter("id"))
-        kwargs['roles'] = roles
-        return kwargs
-
-    def get_initial(self):
-        default_role = api.keystone.get_default_role(self.request)
-        return {'role_id': getattr(default_role, "id", None)}
-'''def register_do(request):
-    rf=RegForm(request.POST)
+def register_do(request):
+    rf=RegUserForm(request.POST)
     er=""
     if rf.is_valid():
         #assert False
@@ -109,12 +67,11 @@ class RegView(forms.ModalFormView):
             user_cmd="/usr/bin/keystone --os_tenant_name=%s --os_username=%s --os_password=%s --os_auth_url=%s user-create --name %s --tenant_id %s --pass %s --email %s |sed -n '6p' | awk '{print $4}'" % (keystone_cfg['admin_tenant_name'],keystone_cfg['admin_user'],keystone_cfg['admin_password'],settings.OPENSTACK_KEYSTONE_URL,username,tenant_cmd_op[1],password,email)
             user_cmd_op=commands.getstatusoutput(user_cmd)
             if(len(user_cmd_op[1])==32):
-                return shortcuts.render(request, 'horizon/register/index.html', {'username':username,'email':email})
+                return shortcuts.render(request, 'register/index.html', {'username':username,'email':email})
             else:
                 er=_('Create User fail, User name perhaps exist')
         else:
             er=_('Create Tenant fail, Tenant name perhaps exist.')
         
-    return shortcuts.render(request, 'horizon/register/index.html', {'form': rf,'error':er})'''
+    return shortcuts.render(request, 'register/index.html', {'form': rf,'error':er})
     
-

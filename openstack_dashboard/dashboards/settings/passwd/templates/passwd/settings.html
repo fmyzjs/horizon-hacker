@@ -1,4 +1,4 @@
-{% extends 'settings/base.html' %}
+{% extends 'base.html' %}
 {% load i18n %}
 {% block title %}User Settings{% endblock %}
 
@@ -6,6 +6,6 @@
   {% include "horizon/common/_page_header.html" with title=_("Change Password") %}
 {% endblock page_header %}
 
-{% block settings_main %}
+{% block main %}
   {% include "settings/passwd/_password.html" %}
 {% endblock %}

@@ -1,5 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
+'''
+Created on 2013-5-5
 
+@author: fmy
+'''
 # Copyright 2012 Openstack, LLC
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,7 +21,7 @@
 from django.conf.urls.defaults import patterns, url
 
 
-urlpatterns = patterns('horizon.dashboards.settings.passwd.views',
+urlpatterns = patterns('openstack_dashboard.dashboards.settings.passwd.views',
     url(r'^$', "index", name='index'),
     url(r'^setpasswd$', 'set_passwd', name="set_passwd"),
 )

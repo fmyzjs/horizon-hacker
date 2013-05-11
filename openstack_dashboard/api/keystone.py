@@ -192,12 +192,6 @@ def user_create(request, user_id, email, password, tenant_id, enabled):
                                                             email,
                                                             tenant_id,
                                                             enabled)
-def user_create(request, user_id, email, password, tenant_id, enabled):
-    return keystoneclient(request, admin=False).users.create(user_id,
-                                                            password,
-                                                            email,
-                                                            tenant_id,
-                                                            enabled)
 
 
 def user_delete(request, user_id):
