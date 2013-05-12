@@ -22,7 +22,6 @@ from django import forms
 from django.forms.forms import NON_FIELD_ERRORS
 from django.utils import dates, timezone
 
-
 class SelfHandlingMixin(object):
     def __init__(self, request, *args, **kwargs):
         self.request = request

@@ -1,8 +1,3 @@
-'''
-Created on 2012-9-17
-
-@author: Lion
-'''
 
 import operator
 from django import shortcuts
@@ -12,22 +7,22 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.debug import sensitive_post_parameters
 
+from horizon.register.forms import RegForm
+
 from horizon import exceptions
 from horizon import forms
-
-
-from openstack_dashboard import api
-from horizon.register.forms import RegUserForm
-from openstack_dashboard.views import get_user_home
-
 import ConfigParser
 import commands
 
 
+def user_home(request):
+    """ Reversible named view to direct a user to the appropriate homepage. """
+    return shortcuts.redirect(horizon.get_user_home(request.user))
+
 def register(request):
     if request.user.is_authenticated():
         return shortcuts.redirect(user_home(request.user))
-    regform = RegUserForm(request)
+    regform = RegForm(request)
     request.session.clear()
     try:
         re=settings.REGISTER_ENABLED
@@ -41,13 +36,17 @@ def register(request):
     else:
         return shortcuts.render(request, 'register/register_disable.html', {'declare': re_declare})
 
-
-    
-
-    
+'''class register(forms.ModalFormView):
+    form_class = RegForm
+    template_name = 'register/index.html'
+    success_url = reverse_lazy('register:register_do')
+    @method_decorator(sensitive_post_parameters('password',
+                                                'confirm_password'))
+    def dispatch(self, *args, **kwargs):
+        return super(register, self).dispatch(*args, **kwargs)'''
 
 def register_do(request):
-    rf=RegUserForm(request.POST)
+    rf=RegForm(request.POST)
     er=""
     if rf.is_valid():
         #assert False
@@ -56,7 +55,7 @@ def register_do(request):
         password=d['password']
         tenantname=username
         email = d['email']
-            #assert False
+        #assert False
         #return shortcuts.render(request, 'horizon/register/index.html', {'username':username,'email':email})
         cfg=ConfigParser.ConfigParser()
         cfg.read('/etc/nova/api-paste.ini')
@@ -74,4 +73,3 @@ def register_do(request):
             er=_('Create Tenant fail, Tenant name perhaps exist.')
         
     return shortcuts.render(request, 'register/index.html', {'form': rf,'error':er})
-    
